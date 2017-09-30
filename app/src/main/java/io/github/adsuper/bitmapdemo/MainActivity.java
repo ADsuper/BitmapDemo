@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
         File cacheDir = mBitmapCaChe.getDiskCacheDir(mContext, "bitmap");
         String path = cacheDir.getPath();
-        Log.d(TAG, "initDiskLruCache: 存储目录：：："+ path );
+        Log.d(TAG, "initDiskLruCache: 存储目录：：：" + path);
         int appVersion = mBitmapCaChe.getAppVersion(mContext);
         try {
             mDiskLruCache = DiskLruCache.open(cacheDir, appVersion, 1, disk_cache_size);
@@ -204,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 使用 diskLrucache 将请求到的图片写入本地磁盘，并显示出来
+     */
     private void diskInput() {
         new Thread(new Runnable() {
             @Override
@@ -211,9 +214,10 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String imageUrl = "http://img.my.csdn.net/uploads/201309/01/1378037235_7476.jpg";
                     String key = mBitmapCaChe.hashKeyForDisk(imageUrl);
-                    Log.d(TAG, "run: Bitmap 存储时候的 key ：：："+ key);
+                    Log.d(TAG, "run: Bitmap 存储时候的 key ：：：" + key);
                     DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                     if (editor != null) {
+                        //获取输入流，将图片显示在 imageview
                         InputStream inputStream = editor.newInputStream(0);
                         final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         runOnUiThread(new Runnable() {
@@ -222,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
                                 mImageView.setImageBitmap(bitmap);
                             }
                         });
+                        //获取输出流，将 bitmap 写入SD 卡
                         OutputStream outputStream = editor.newOutputStream(0);
                         if (mBitmapCaChe.downloadUrlToStream(imageUrl, outputStream)) {
                             editor.commit();
@@ -235,6 +240,63 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    /**
+     * 从内存中获取bitmap
+     *
+     * @param key
+     * @return
+     */
+    private Bitmap getBitmapFromMemoryCache(String key) {
+        Bitmap bitmap = mBitmapMemoryLruCache.get(key);
+        return bitmap;
+    }
+
+    /**
+     * 将 bitmap 缓存至内存
+     *
+     * @param key
+     * @param bitmap
+     */
+    private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemoryCache(key) == null) {
+            mBitmapMemoryLruCache.put(key, bitmap);
+        }
+    }
+
+    /**
+     * 从 SD 卡中获取缓存图片
+     *
+     * @param url 图片 url
+     * @return
+     */
+    private Bitmap getBitmapFromSDcardCache(String url) {
+        String key = mBitmapCaChe.hashKeyForDisk(url);
+        try {
+            DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+            if (snapshot != null) {
+                InputStream is = snapshot.getInputStream(0);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                return bitmap;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void putBitmapFromSDcardCache(String url, OutputStream outPutStream) {
+        String key = mBitmapCaChe.hashKeyForDisk(url);
+
+        try {
+
+            DiskLruCache.Editor edit = mDiskLruCache.edit(key);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

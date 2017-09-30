@@ -103,17 +103,17 @@ public class BitmapCaChe {
 
     /**
      * 将 url 地址转化为 MD5
-     * @param key
+     * @param url 图片请求地址
      * @return
      */
-    public String hashKeyForDisk(String key) {
+    public String hashKeyForDisk(String url) {
         String cacheKey;
         try {
             final MessageDigest mDigest = MessageDigest.getInstance("MD5");
-            mDigest.update(key.getBytes());
+            mDigest.update(url.getBytes());
             cacheKey = bytesToHexString(mDigest.digest());
         } catch (NoSuchAlgorithmException e) {
-            cacheKey = String.valueOf(key.hashCode());
+            cacheKey = String.valueOf(url.hashCode());
         }
         return cacheKey;
     }
@@ -129,6 +129,8 @@ public class BitmapCaChe {
         }
         return sb.toString();
     }
+
+
 
 
 
