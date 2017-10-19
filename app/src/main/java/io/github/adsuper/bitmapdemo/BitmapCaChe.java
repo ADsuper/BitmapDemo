@@ -19,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * 作者：luoshen/rsf411613593@gmail.com
  * 时间：2017年09月29日
- * 说明：bitmap 缓存类
+ * 说明：bitmap    缓存类
  */
 
 public class BitmapCaChe {
@@ -41,6 +41,8 @@ public class BitmapCaChe {
         } else {
             cachePath = context.getCacheDir().getPath();
             Log.d(TAG, "getDiskCacheDir:  SD 卡不存在：："+cachePath);
+			
+			
         }
         return new File(cachePath + File.separator + uniqueName);
     }
